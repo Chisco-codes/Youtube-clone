@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subscriptions - MyTube Clone</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="top-nav">
+  <h1 class="logo">MyTube</h1>
+  <input type="search" id="searchInput" placeholder="Search" />
+  <div class="profile">👤</div>
+</header>
+
+<div class="container">
+  <aside class="sidebar">
+    <a href="index.html">🏠 Home</a>
+    <a href="trending.html">🔥 Trending</a>
+    <a href="subscriptions.html">📺 Subscriptions</a>
+    <a href="library.html">📁 Library</a>
+  </aside>
+
+  <main class="videos">
+    <h2 style="padding:20px; color:#fff;">📺 Your Subscriptions Will Appear Here</h2>
+  </main>
+</div>
+
+<nav class="bottom-nav">
+  <span data-nav="home">🏠</span>
+  <span data-nav="trending">🔥</span>
+  <span data-nav="upload">➕</span>
+  <span data-nav="subscriptions">📺</span>
+  <span data-nav="library">📁</span>
+</nav>
+
+<script>
+  const bottomNav = document.querySelectorAll(".bottom-nav span");
+  bottomNav.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const nav = btn.dataset.nav;
+      switch(nav) {
+        case "home": window.location.href = "index.html"; break;
+        case "trending": window.location.href = "trending.html"; break;
+        case "upload": alert("Upload feature coming soon!"); break;
+        case "subscriptions": window.location.href = "subscriptions.html"; break;
+        case "library": window.location.href = "library.html"; break;
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

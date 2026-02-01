@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YouTube Clone</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- TOP NAV -->
+<header class="top-nav">
+  <h1 class="logo">MyTube</h1>
+  <input type="search" id="searchInput" placeholder="Search" />
+  <div class="profile">👤</div>
+</header>
+
+<div class="container">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a data-nav="home">🏠 Home</a>
+    <a data-nav="trending">🔥 Trending</a>
+    <a data-nav="subscriptions">📺 Subscriptions</a>
+    <a data-nav="library">📁 Library</a>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="videos" id="videoGrid"></main>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bottom-nav">
+  <span data-nav="home">🏠</span>
+  <span data-nav="trending">🔥</span>
+  <span data-nav="upload">➕</span>
+  <span data-nav="subscriptions">📺</span>
+  <span data-nav="library">📁</span>
+</nav>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+  // Make sidebar links clickable
+  const sidebarLinks = document.querySelectorAll('.sidebar a');
+  sidebarLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const nav = link.dataset.nav;
+      switch(nav) {
+        case 'home': window.location.href = 'index.html'; break;
+        case 'trending': window.location.href = 'trending.html'; break;
+        case 'subscriptions': window.location.href = 'subscriptions.html'; break;
+        case 'library': window.location.href = 'library.html'; break;
+      }
+    });
+  });
+
+  // Make bottom nav icons clickable
+  const bottomNav = document.querySelectorAll(".bottom-nav span");
+  bottomNav.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const nav = btn.dataset.nav;
+      switch(nav) {
+        case "home": window.location.href = "index.html"; break;
+        case "trending": window.location.href = "trending.html"; break;
+        case "upload": alert("Upload feature coming soon!"); break;
+        case "subscriptions": window.location.href = "subscriptions.html"; break;
+        case "library": window.location.href = "library.html"; break;
+      }
+    });
+  });
+
+  // ===== Highlight active page =====
+  const currentPage = window.location.pathname.split("/").pop(); // e.g., 'index.html'
+
+  // Highlight sidebar
+  sidebarLinks.forEach(link => {
+    if (
+      (currentPage === 'index.html' && link.dataset.nav === 'home') ||
+      (currentPage === 'trending.html' && link.dataset.nav === 'trending') ||
+      (currentPage === 'subscriptions.html' && link.dataset.nav === 'subscriptions') ||
+      (currentPage === 'library.html' && link.dataset.nav === 'library')
+    ) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+
+  // Highlight bottom nav
+  bottomNav.forEach(btn => {
+    if (
+      (currentPage === 'index.html' && btn.dataset.nav === 'home') ||
+      (currentPage === 'trending.html' && btn.dataset.nav === 'trending') ||
+      (currentPage === 'subscriptions.html' && btn.dataset.nav === 'subscriptions') ||
+      (currentPage === 'library.html' && btn.dataset.nav === 'library')
+    ) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+</script>
+</body>
+</html>

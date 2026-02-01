@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Watch - MyTube Clone</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="watch-page">
+
+<!-- TOP NAV -->
+<header class="top-nav">
+  <h1 class="logo">MyTube</h1>
+  <input type="search" id="searchInput" placeholder="Search" />
+  <div class="profile">👤</div>
+</header>
+
+<div class="container">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" data-nav="home">🏠 Home</a>
+    <a href="trending.html" data-nav="trending">🔥 Trending</a>
+    <a href="subscriptions.html" data-nav="subscriptions">📺 Subscriptions</a>
+    <a href="library.html" data-nav="library">📁 Library</a>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="videos">
+    <div id="videoInfo" style="margin-bottom: 12px;">
+      <h2 id="videoTitle" style="font-size:1.2rem; margin-bottom:4px;"></h2>
+      <div id="videoChannel" style="color:#ccc; margin-bottom:2px;"></div>
+      <div id="videoMeta" style="color:#aaa; font-size:0.85rem;"></div>
+    </div>
+
+
+
+    <!-- Responsive video wrapper -->
+    <div class="video-wrapper">
+      <iframe
+        id="player"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </main>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bottom-nav">
+  <span data-nav="home">🏠</span>
+  <span data-nav="trending">🔥</span>
+  <span data-nav="upload">➕</span>
+  <span data-nav="subscriptions">📺</span>
+  <span data-nav="library">📁</span>
+</nav>
+
+<script src="data.js"></script>
+<script>
+  // Get video id from URL
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+
+  // Find the video in the videos array
+  let videoData = null;
+  if (id && typeof videos !== "undefined") {
+    videoData = videos.find(v => v.id === id);
+
+    // Set iframe src
+    document.getElementById("player").src = `https://www.youtube.com/embed/${id}`;
+
+    // Set video info
+    if (videoData) {
+      document.getElementById("videoTitle").textContent = videoData.title;
+      document.getElementById("videoChannel").textContent = videoData.channel;
+      document.getElementById("videoMeta").textContent = `${videoData.views} • ${videoData.time}`;
+    }
+  }
+
+  // ===== Bottom nav clickable functionality =====
+  const bottomNav = document.querySelectorAll(".bottom-nav span");
+  bottomNav.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const nav = btn.dataset.nav;
+      switch(nav) {
+        case "home": window.location.href = "index.html"; break;
+        case "trending": window.location.href = "trending.html"; break;
+        case "upload": alert("Upload feature coming soon!"); break;
+        case "subscriptions": window.location.href = "subscriptions.html"; break;
+        case "library": window.location.href = "library.html"; break;
+      }
+    });
+  });
+
+  // ===== Sidebar clickable functionality =====
+  const sidebarLinks = document.querySelectorAll('.sidebar a');
+  sidebarLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const nav = link.dataset.nav;
+      switch(nav) {
+        case 'home': window.location.href = 'index.html'; break;
+        case 'trending': window.location.href = 'trending.html'; break;
+        case 'subscriptions': window.location.href = 'subscriptions.html'; break;
+        case 'library': window.location.href = 'library.html'; break;
+      }
+    });
+  });
+
+  // ===== Highlight active page =====
+  const currentPage = window.location.pathname.split("/").pop(); // e.g., 'watch.html' or 'index.html'
+
+  // Highlight sidebar
+  sidebarLinks.forEach(link => {
+    if (
+      (currentPage === 'index.html' && link.dataset.nav === 'home') ||
+      (currentPage === 'trending.html' && link.dataset.nav === 'trending') ||
+      (currentPage === 'subscriptions.html' && link.dataset.nav === 'subscriptions') ||
+      (currentPage === 'library.html' && link.dataset.nav === 'library') ||
+      (currentPage === 'watch.html' && link.dataset.nav === 'home') // watch.html treated as home
+    ) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+
+  // Highlight bottom nav
+  bottomNav.forEach(btn => {
+    if (
+      (currentPage === 'index.html' && btn.dataset.nav === 'home') ||
+      (currentPage === 'trending.html' && btn.dataset.nav === 'trending') ||
+      (currentPage === 'subscriptions.html' && btn.dataset.nav === 'subscriptions') ||
+      (currentPage === 'library.html' && btn.dataset.nav === 'library') ||
+      (currentPage === 'watch.html' && btn.dataset.nav === 'home') // watch.html treated as home
+    ) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+</script>
+
+</body>
+</html>
