@@ -18,14 +18,30 @@
 <div class="container">
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <a data-nav="home">🏠 Home</a>
-    <a data-nav="trending">🔥 Trending</a>
-    <a data-nav="subscriptions">📺 Subscriptions</a>
-    <a data-nav="library">📁 Library</a>
+    <a href="index.html" data-nav="home">🏠 Home</a>
+    <a href="trending.html" data-nav="trending">🔥 Trending</a>
+    <a href="subscriptions.html" data-nav="subscriptions">📺 Subscriptions</a>
+    <a href="library.html" data-nav="library">📁 Library</a>
   </aside>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN CONTENT – VIDEO GRID -->
   <main class="videos" id="videoGrid"></main>
+
+  <!-- Load More Button -->
+  <div id="loadMoreContainer" style="text-align:center; padding:30px 0; display:none;">
+    <button id="loadMoreBtn" style="
+      background: #065fd4;
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 999px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    ">
+      Load more
+    </button>
+  </div>
 </div>
 
 <!-- MOBILE BOTTOM NAV -->
@@ -38,23 +54,155 @@
 </nav>
 
 <script src="data.js"></script>
-<script src="app.js"></script>
 <script>
-  // Make sidebar links clickable
-  const sidebarLinks = document.querySelectorAll('.sidebar a');
-  sidebarLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      const nav = link.dataset.nav;
-      switch(nav) {
-        case 'home': window.location.href = 'index.html'; break;
-        case 'trending': window.location.href = 'trending.html'; break;
-        case 'subscriptions': window.location.href = 'subscriptions.html'; break;
-        case 'library': window.location.href = 'library.html'; break;
+  // ─── Home Page Infinite Scroll + Load More Button ───
+  document.addEventListener("DOMContentLoaded", () => {
+    const grid = document.getElementById("videoGrid");
+    const searchInput = document.getElementById("searchInput");
+    const loadMoreContainer = document.getElementById("loadMoreContainer");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+    let loadedCount = 0;
+    const batchSize = 20;
+    let isLoading = false;
+
+    // Render a batch of videos
+    function renderVideoBatch(start, end) {
+      if (!grid) return;
+
+      const batch = videos.slice(start, end);
+
+      batch.forEach(video => {
+        const card = document.createElement("div");
+        card.className = "video-card";
+
+        card.innerHTML = `
+          <div class="thumb-wrapper">
+            <img 
+              class="thumbnail" 
+              src="${video.thumbnail || 'https://placehold.co/400x225/333/fff/png?text=Video'}" 
+              alt="${video.title}"
+              onerror="this.src='https://placehold.co/400x225/222/aaa/png?text=No+Thumb'; this.onerror=null;"
+            />
+            <span class="duration">${video.duration || "N/A"}</span>
+          </div>
+          <div class="video-info">
+            <div class="video-title">${video.title}</div>
+            <div class="video-meta">${video.channel}</div>
+            <div class="video-meta">${video.views} • ${video.time}</div>
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          window.location.href = `watch.html?id=${video.id}`;
+        });
+
+        grid.appendChild(card);
+      });
+
+      console.log(`Rendered batch: ${start} → ${end-1} (${batch.length} cards)`);
+    }
+
+    // Check if we should show "Load more" button
+    function updateLoadMoreButton() {
+      if (loadedCount < videos.length) {
+        loadMoreContainer.style.display = "block";
+      } else {
+        loadMoreContainer.style.display = "none";
+      }
+    }
+
+    // Initial load
+    function initHomeRender() {
+      if (grid && typeof videos !== "undefined" && videos.length > 0) {
+        grid.innerHTML = "";
+        renderVideoBatch(0, batchSize);
+        loadedCount = batchSize;
+        updateLoadMoreButton();
+        console.log("Home page initial batch loaded - Total:", videos.length);
+      } else {
+        grid.innerHTML = '<p style="text-align:center; color:#aaa; padding:40px;">Loading videos...</p>';
+        setTimeout(initHomeRender, 500);
+      }
+    }
+
+    initHomeRender();
+
+    // Infinite scroll (auto-load near bottom)
+    window.addEventListener("scroll", () => {
+      if (isLoading || loadedCount >= videos.length) return;
+
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+        isLoading = true;
+        loadMoreContainer.style.display = "none"; // hide button while loading
+
+        const nextStart = loadedCount;
+        const nextEnd = Math.min(loadedCount + batchSize, videos.length);
+
+        renderVideoBatch(nextStart, nextEnd);
+        loadedCount = nextEnd;
+
+        setTimeout(() => {
+          isLoading = false;
+          updateLoadMoreButton();
+        }, 800);
       }
     });
+
+    // Load more button click (fallback/manual trigger)
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener("click", () => {
+        if (isLoading || loadedCount >= videos.length) return;
+
+        isLoading = true;
+        loadMoreBtn.textContent = "Loading...";
+        loadMoreBtn.disabled = true;
+
+        const nextStart = loadedCount;
+        const nextEnd = Math.min(loadedCount + batchSize, videos.length);
+
+        renderVideoBatch(nextStart, nextEnd);
+        loadedCount = nextEnd;
+
+        setTimeout(() => {
+          isLoading = false;
+          loadMoreBtn.textContent = "Load more";
+          loadMoreBtn.disabled = false;
+          updateLoadMoreButton();
+        }, 800);
+      });
+    }
+
+    // Search filtering (resets everything)
+    if (searchInput) {
+      searchInput.addEventListener("input", () => {
+        const value = searchInput.value.toLowerCase().trim();
+
+        grid.innerHTML = "";
+        loadedCount = 0;
+        loadMoreContainer.style.display = "none";
+
+        if (!value) {
+          renderVideoBatch(0, batchSize);
+          loadedCount = batchSize;
+          updateLoadMoreButton();
+          return;
+        }
+
+        const filtered = videos.filter(video =>
+          video.title.toLowerCase().includes(value) ||
+          (video.channel && video.channel.toLowerCase().includes(value))
+        );
+
+        renderVideoBatch(0, filtered.length);
+        console.log("Search filtered to", filtered.length, "videos");
+      });
+    }
+
+    console.log("Home page infinite scroll + load more initialized");
   });
 
-  // Make bottom nav icons clickable
+  // ─── Bottom nav clickable ───
   const bottomNav = document.querySelectorAll(".bottom-nav span");
   bottomNav.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -69,36 +217,35 @@
     });
   });
 
-  // ===== Highlight active page =====
-  const currentPage = window.location.pathname.split("/").pop(); // e.g., 'index.html'
-
-  // Highlight sidebar
+  // ─── Sidebar clickable ───
+  const sidebarLinks = document.querySelectorAll('.sidebar a');
   sidebarLinks.forEach(link => {
-    if (
-      (currentPage === 'index.html' && link.dataset.nav === 'home') ||
-      (currentPage === 'trending.html' && link.dataset.nav === 'trending') ||
-      (currentPage === 'subscriptions.html' && link.dataset.nav === 'subscriptions') ||
-      (currentPage === 'library.html' && link.dataset.nav === 'library')
-    ) {
-      link.classList.add('active');
-    } else {
-      link.classList.remove('active');
-    }
+    link.addEventListener('click', () => {
+      const nav = link.dataset.nav;
+      switch(nav) {
+        case 'home': window.location.href = 'index.html'; break;
+        case 'trending': window.location.href = 'trending.html'; break;
+        case 'subscriptions': window.location.href = 'subscriptions.html'; break;
+        case 'library': window.location.href = 'library.html'; break;
+      }
+    });
   });
 
-  // Highlight bottom nav
-  bottomNav.forEach(btn => {
-    if (
-      (currentPage === 'index.html' && btn.dataset.nav === 'home') ||
-      (currentPage === 'trending.html' && btn.dataset.nav === 'trending') ||
-      (currentPage === 'subscriptions.html' && btn.dataset.nav === 'subscriptions') ||
-      (currentPage === 'library.html' && btn.dataset.nav === 'library')
-    ) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
-    }
+  // ─── Highlight active page ───
+  const currentPage = window.location.pathname.split("/").pop() || 'index.html';
+
+  document.querySelectorAll('.sidebar a, .bottom-nav span').forEach(el => {
+    const nav = el.dataset.nav;
+    const isActive = 
+      (currentPage === 'index.html' && nav === 'home') ||
+      (currentPage === 'trending.html' && nav === 'trending') ||
+      (currentPage === 'subscriptions.html' && nav === 'subscriptions') ||
+      (currentPage === 'library.html' && nav === 'library');
+
+    if (isActive) el.classList.add('active');
+    else el.classList.remove('active');
   });
 </script>
+
 </body>
 </html>

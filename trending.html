@@ -22,8 +22,36 @@
     <a href="library.html" data-nav="library">📁 Library</a>
   </aside>
 
-  <main class="videos">
-    <h2 style="padding:20px; color:#fff;">🔥 Trending Videos Coming Soon</h2>
+  <main class="trending-main">
+
+    <!-- Trending Tabs -->
+    <div class="trending-tabs">
+      <button data-tab="music" class="active">🎵 Music</button>
+      <button data-tab="balanced">🔥 Balanced</button>
+      <button data-tab="gaming">🎮 Gaming</button>
+    </div>
+
+    <!-- Featured #1 Video -->
+    <div id="featuredVideo" class="featured-video"></div>
+
+    <!-- Trending Videos Grid -->
+    <div id="trendingGrid" class="videos-grid"></div>
+
+    <!-- Load More Button for Trending -->
+    <div id="loadMoreTrending" style="text-align:center; padding:40px 0; display:none;">
+      <button id="loadMoreTrendingBtn" style="
+        background: #065fd4;
+        color: white;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 999px;
+        font-size: 1rem;
+        cursor: pointer;
+      ">
+        Load more
+      </button>
+    </div>
+
   </main>
 </div>
 
@@ -35,65 +63,138 @@
   <span data-nav="library">📁</span>
 </nav>
 
+<script src="data.js"></script>
+<script src="trending.js"></script>
 <script>
-  // ===== Bottom nav clickable functionality =====
-  const bottomNav = document.querySelectorAll(".bottom-nav span");
-  bottomNav.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const nav = btn.dataset.nav;
-      switch(nav) {
-        case "home": window.location.href = "index.html"; break;
-        case "trending": window.location.href = "trending.html"; break;
-        case "upload": alert("Upload feature coming soon!"); break;
-        case "subscriptions": window.location.href = "subscriptions.html"; break;
-        case "library": window.location.href = "library.html"; break;
+  // ─── Infinite Scroll + Load More for Trending ───
+  document.addEventListener("DOMContentLoaded", () => {
+    const trendingGrid = document.getElementById("trendingGrid");
+    const loadMoreContainer = document.getElementById("loadMoreTrending");
+    const loadMoreBtn = document.getElementById("loadMoreTrendingBtn");
+
+    let currentMode = "music"; // default tab
+    let loadedCount = 0;
+    const batchSize = 15;
+    let isLoading = false;
+    let currentList = []; // current sorted list for the active tab
+
+    // Update grid with current batch
+    function appendTrendingBatch(start, end) {
+      if (!trendingGrid) return;
+
+      const batch = currentList.slice(start, end);
+
+      batch.forEach((video, index) => {
+        const globalIndex = start + index;
+        const card = document.createElement("div");
+        card.className = "video-card";
+        card.innerHTML = `
+          <div class="thumb-wrapper">
+            <img class="thumbnail" src="${video.thumbnail}" alt="${video.title}">
+            <span class="duration">${video.duration || "N/A"}</span>
+            <span class="trending-rank">🔥 #${globalIndex + 1}</span>
+          </div>
+          <div class="video-info">
+            <div class="video-title">${video.title}</div>
+            <div class="video-meta">
+              ${video.channel}<br>
+              ${video.views} • ${video.time}
+            </div>
+          </div>
+        `;
+        card.addEventListener("click", () => {
+          window.location.href = `watch.html?id=${video.id}`;
+        });
+        trendingGrid.appendChild(card);
+      });
+
+      console.log(`Trending: Appended batch ${start} → ${end-1} (${batch.length} cards)`);
+    }
+
+    // Load next batch (called by scroll or button)
+    function loadNextTrendingBatch() {
+      if (isLoading || loadedCount >= currentList.length) return;
+
+      isLoading = true;
+      if (loadMoreBtn) {
+        loadMoreBtn.textContent = "Loading...";
+        loadMoreBtn.disabled = true;
+      }
+
+      const nextStart = loadedCount;
+      const nextEnd = Math.min(loadedCount + batchSize, currentList.length);
+
+      appendTrendingBatch(nextStart, nextEnd);
+      loadedCount = nextEnd;
+
+      setTimeout(() => {
+        isLoading = false;
+        if (loadMoreBtn) {
+          loadMoreBtn.textContent = "Load more";
+          loadMoreBtn.disabled = false;
+        }
+        updateLoadMoreVisibility();
+      }, 800);
+    }
+
+    // Show/hide Load more button
+    function updateLoadMoreVisibility() {
+      if (loadedCount < currentList.length && loadMoreContainer) {
+        loadMoreContainer.style.display = "block";
+      } else if (loadMoreContainer) {
+        loadMoreContainer.style.display = "none";
+      }
+    }
+
+    // Re-render trending when tab changes (reset loaded count)
+    function refreshTrendingGrid(mode) {
+      if (!trendingGrid) return;
+
+      // Clear old content (except featured if you want to keep it)
+      trendingGrid.innerHTML = "";
+      loadedCount = 0;
+
+      // Get new sorted list for this mode
+      currentList = getTrendingVideos(mode); // your existing function
+      currentMode = mode;
+
+      // Render first batch
+      appendTrendingBatch(0, batchSize);
+      loadedCount = batchSize;
+
+      updateLoadMoreVisibility();
+      console.log(`Trending refreshed for ${mode} - ${currentList.length} videos available`);
+    }
+
+    // Hook into your existing tab switching (add this after your tabs.forEach)
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        const mode = tab.dataset.tab;
+        refreshTrendingGrid(mode);
+      });
+    });
+
+    // Initial load (music tab)
+    refreshTrendingGrid("music");
+
+    // Infinite scroll
+    window.addEventListener("scroll", () => {
+      if (isLoading || loadedCount >= currentList.length) return;
+
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+        loadNextTrendingBatch();
       }
     });
-  });
 
-  // ===== Sidebar clickable functionality =====
-  const sidebarLinks = document.querySelectorAll('.sidebar a');
-  sidebarLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      const nav = link.dataset.nav;
-      switch(nav) {
-        case 'home': window.location.href = 'index.html'; break;
-        case 'trending': window.location.href = 'trending.html'; break;
-        case 'subscriptions': window.location.href = 'subscriptions.html'; break;
-        case 'library': window.location.href = 'library.html'; break;
-      }
-    });
-  });
-
-  // ===== Highlight active page =====
-  const currentPage = window.location.pathname.split("/").pop(); // e.g., 'trending.html'
-
-  // Highlight sidebar
-  sidebarLinks.forEach(link => {
-    if (
-      (currentPage === 'index.html' && link.dataset.nav === 'home') ||
-      (currentPage === 'trending.html' && link.dataset.nav === 'trending') ||
-      (currentPage === 'subscriptions.html' && link.dataset.nav === 'subscriptions') ||
-      (currentPage === 'library.html' && link.dataset.nav === 'library')
-    ) {
-      link.classList.add('active');
-    } else {
-      link.classList.remove('active');
+    // Load more button click
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener("click", loadNextTrendingBatch);
     }
-  });
 
-  // Highlight bottom nav
-  bottomNav.forEach(btn => {
-    if (
-      (currentPage === 'index.html' && btn.dataset.nav === 'home') ||
-      (currentPage === 'trending.html' && btn.dataset.nav === 'trending') ||
-      (currentPage === 'subscriptions.html' && btn.dataset.nav === 'subscriptions') ||
-      (currentPage === 'library.html' && btn.dataset.nav === 'library')
-    ) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
-    }
+    console.log("Trending infinite scroll + load more ready");
   });
 </script>
 
