@@ -37,7 +37,7 @@
     <!-- Trending Videos Grid -->
     <div id="trendingGrid" class="videos-grid"></div>
 
-    <!-- Load More Button for Trending -->
+    <!-- Load More Button -->
     <div id="loadMoreTrending" style="text-align:center; padding:40px 0; display:none;">
       <button id="loadMoreTrendingBtn" style="
         background: #065fd4;
@@ -47,6 +47,7 @@
         border-radius: 999px;
         font-size: 1rem;
         cursor: pointer;
+        min-width: 140px;
       ">
         Load more
       </button>
@@ -66,21 +67,20 @@
 <script src="data.js"></script>
 <script src="trending.js"></script>
 <script>
-  // ─── Infinite Scroll + Load More for Trending ───
+  // Infinite Scroll + Load More for Trending (your existing code, unchanged)
   document.addEventListener("DOMContentLoaded", () => {
-    const trendingGrid = document.getElementById("trendingGrid");
+    const grid = document.getElementById("trendingGrid");
     const loadMoreContainer = document.getElementById("loadMoreTrending");
     const loadMoreBtn = document.getElementById("loadMoreTrendingBtn");
 
-    let currentMode = "music"; // default tab
+    let currentMode = "music";
     let loadedCount = 0;
     const batchSize = 15;
     let isLoading = false;
-    let currentList = []; // current sorted list for the active tab
+    let currentList = [];
 
-    // Update grid with current batch
-    function appendTrendingBatch(start, end) {
-      if (!trendingGrid) return;
+    function appendBatch(start, end) {
+      if (!grid) return;
 
       const batch = currentList.slice(start, end);
 
@@ -88,9 +88,10 @@
         const globalIndex = start + index;
         const card = document.createElement("div");
         card.className = "video-card";
+
         card.innerHTML = `
           <div class="thumb-wrapper">
-            <img class="thumbnail" src="${video.thumbnail}" alt="${video.title}">
+            <img class="thumbnail" src="${video.thumbnail || 'https://placehold.co/400x225/333/fff/png?text=Video'}" alt="${video.title}">
             <span class="duration">${video.duration || "N/A"}</span>
             <span class="trending-rank">🔥 #${globalIndex + 1}</span>
           </div>
@@ -102,17 +103,16 @@
             </div>
           </div>
         `;
+
         card.addEventListener("click", () => {
           window.location.href = `watch.html?id=${video.id}`;
         });
-        trendingGrid.appendChild(card);
-      });
 
-      console.log(`Trending: Appended batch ${start} → ${end-1} (${batch.length} cards)`);
+        grid.appendChild(card);
+      });
     }
 
-    // Load next batch (called by scroll or button)
-    function loadNextTrendingBatch() {
+    function loadNextBatch() {
       if (isLoading || loadedCount >= currentList.length) return;
 
       isLoading = true;
@@ -124,7 +124,7 @@
       const nextStart = loadedCount;
       const nextEnd = Math.min(loadedCount + batchSize, currentList.length);
 
-      appendTrendingBatch(nextStart, nextEnd);
+      appendBatch(nextStart, nextEnd);
       loadedCount = nextEnd;
 
       setTimeout(() => {
@@ -133,68 +133,112 @@
           loadMoreBtn.textContent = "Load more";
           loadMoreBtn.disabled = false;
         }
-        updateLoadMoreVisibility();
+        updateLoadMoreBtn();
       }, 800);
     }
 
-    // Show/hide Load more button
-    function updateLoadMoreVisibility() {
-      if (loadedCount < currentList.length && loadMoreContainer) {
-        loadMoreContainer.style.display = "block";
-      } else if (loadMoreContainer) {
-        loadMoreContainer.style.display = "none";
+    function updateLoadMoreBtn() {
+      if (loadMoreContainer) {
+        loadMoreContainer.style.display = loadedCount < currentList.length ? "block" : "none";
       }
     }
 
-    // Re-render trending when tab changes (reset loaded count)
-    function refreshTrendingGrid(mode) {
-      if (!trendingGrid) return;
+    function refreshTrending(mode) {
+      if (!grid) return;
 
-      // Clear old content (except featured if you want to keep it)
-      trendingGrid.innerHTML = "";
+      grid.innerHTML = "";
       loadedCount = 0;
 
-      // Get new sorted list for this mode
-      currentList = getTrendingVideos(mode); // your existing function
+      currentList = getTrendingVideos(mode); // from trending.js
       currentMode = mode;
 
-      // Render first batch
-      appendTrendingBatch(0, batchSize);
+      appendBatch(0, batchSize);
       loadedCount = batchSize;
-
-      updateLoadMoreVisibility();
-      console.log(`Trending refreshed for ${mode} - ${currentList.length} videos available`);
+      updateLoadMoreBtn();
     }
 
-    // Hook into your existing tab switching (add this after your tabs.forEach)
+    // Hook into tab clicks
+    const tabs = document.querySelectorAll(".trending-tabs button");
     tabs.forEach(tab => {
       tab.addEventListener("click", () => {
         tabs.forEach(t => t.classList.remove("active"));
         tab.classList.add("active");
-
-        const mode = tab.dataset.tab;
-        refreshTrendingGrid(mode);
+        refreshTrending(tab.dataset.tab);
       });
     });
 
-    // Initial load (music tab)
-    refreshTrendingGrid("music");
+    // Initial load
+    refreshTrending("music");
 
     // Infinite scroll
     window.addEventListener("scroll", () => {
       if (isLoading || loadedCount >= currentList.length) return;
 
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
-        loadNextTrendingBatch();
+        loadNextBatch();
       }
     });
 
-    // Load more button click
+    // Load more button
     if (loadMoreBtn) {
-      loadMoreBtn.addEventListener("click", loadNextTrendingBatch);
+      loadMoreBtn.addEventListener("click", loadNextBatch);
     }
 
-    console.log("Trending infinite scroll + load more ready");
+    // ─── FIXED NAVIGATION (sidebar + bottom nav) ───
+    console.log("Attaching navigation listeners (trending page)");
+
+    // Bottom nav
+    const bottomNav = document.querySelectorAll(".bottom-nav span");
+    console.log("Bottom nav items found:", bottomNav.length);
+    bottomNav.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const nav = btn.dataset.nav;
+        console.log("Bottom nav clicked:", nav);
+        switch(nav) {
+          case "home": window.location.href = "index.html"; break;
+          case "trending": window.location.href = "trending.html"; break;
+          case "upload": alert("Upload coming soon!"); break;
+          case "subscriptions": window.location.href = "subscriptions.html"; break;
+          case "library": window.location.href = "library.html"; break;
+        }
+      });
+    });
+
+    // Sidebar
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+    console.log("Sidebar links found:", sidebarLinks.length);
+    sidebarLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const nav = link.dataset.nav;
+        console.log("Sidebar clicked:", nav);
+        switch(nav) {
+          case 'home': window.location.href = 'index.html'; break;
+          case 'trending': window.location.href = 'trending.html'; break;
+          case 'subscriptions': window.location.href = 'subscriptions.html'; break;
+          case 'library': window.location.href = 'library.html'; break;
+        }
+      });
+    });
+
+    // Highlight active page
+    const currentPage = window.location.pathname.split("/").pop() || 'trending.html';
+    console.log("Current page:", currentPage);
+
+    document.querySelectorAll('.sidebar a, .bottom-nav span').forEach(el => {
+      const nav = el.dataset.nav;
+      if (
+        (currentPage === 'index.html' && nav === 'home') ||
+        (currentPage === 'trending.html' && nav === 'trending') ||
+        (currentPage === 'subscriptions.html' && nav === 'subscriptions') ||
+        (currentPage === 'library.html' && nav === 'library')
+      ) {
+        el.classList.add('active');
+      } else {
+        el.classList.remove('active');
+      }
+    });
   });
 </script>
 

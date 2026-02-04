@@ -28,7 +28,7 @@
   <main class="videos" id="videoGrid"></main>
 
   <!-- Load More Button -->
-  <div id="loadMoreContainer" style="text-align:center; padding:30px 0; display:none;">
+  <div id="loadMoreContainer" style="text-align:center; padding:40px 0; display:none;">
     <button id="loadMoreBtn" style="
       background: #065fd4;
       color: white;
@@ -37,10 +37,7 @@
       border-radius: 999px;
       font-size: 1rem;
       cursor: pointer;
-      transition: background 0.2s;
-    ">
-      Load more
-    </button>
+    ">Load more</button>
   </div>
 </div>
 
@@ -55,8 +52,10 @@
 
 <script src="data.js"></script>
 <script>
-  // ─── Home Page Infinite Scroll + Load More Button ───
+  // All logic waits for DOM ready
   document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM ready - initializing home page");
+
     const grid = document.getElementById("videoGrid");
     const searchInput = document.getElementById("searchInput");
     const loadMoreContainer = document.getElementById("loadMoreContainer");
@@ -66,7 +65,7 @@
     const batchSize = 20;
     let isLoading = false;
 
-    // Render a batch of videos
+    // Render batch
     function renderVideoBatch(start, end) {
       if (!grid) return;
 
@@ -82,7 +81,7 @@
               class="thumbnail" 
               src="${video.thumbnail || 'https://placehold.co/400x225/333/fff/png?text=Video'}" 
               alt="${video.title}"
-              onerror="this.src='https://placehold.co/400x225/222/aaa/png?text=No+Thumb'; this.onerror=null;"
+              onerror="this.src='https://placehold.co/400x225/222/aaa/png?text=No+Thumb';this.onerror=null;"
             />
             <span class="duration">${video.duration || "N/A"}</span>
           </div>
@@ -93,157 +92,147 @@
           </div>
         `;
 
-        card.addEventListener("click", () => {
-          window.location.href = `watch.html?id=${video.id}`;
+        card.addEventListener("click", (e) => {
+          e.preventDefault();
+          const url = `watch.html?id=${video.id}`;
+          console.log("Video clicked →", url);
+          window.location.href = url;
         });
 
         grid.appendChild(card);
       });
-
-      console.log(`Rendered batch: ${start} → ${end-1} (${batch.length} cards)`);
     }
 
-    // Check if we should show "Load more" button
-    function updateLoadMoreButton() {
-      if (loadedCount < videos.length) {
-        loadMoreContainer.style.display = "block";
-      } else {
-        loadMoreContainer.style.display = "none";
+    function updateLoadMore() {
+      if (loadMoreContainer) {
+        loadMoreContainer.style.display = loadedCount < videos.length ? "block" : "none";
       }
+    }
+
+    function loadNextBatch() {
+      if (isLoading || loadedCount >= videos.length) return;
+
+      isLoading = true;
+      if (loadMoreBtn) {
+        loadMoreBtn.textContent = "Loading...";
+        loadMoreBtn.disabled = true;
+      }
+
+      const start = loadedCount;
+      const end = Math.min(loadedCount + batchSize, videos.length);
+
+      renderVideoBatch(start, end);
+      loadedCount = end;
+
+      setTimeout(() => {
+        isLoading = false;
+        if (loadMoreBtn) {
+          loadMoreBtn.textContent = "Load more";
+          loadMoreBtn.disabled = false;
+        }
+        updateLoadMore();
+      }, 800);
     }
 
     // Initial load
-    function initHomeRender() {
-      if (grid && typeof videos !== "undefined" && videos.length > 0) {
-        grid.innerHTML = "";
-        renderVideoBatch(0, batchSize);
-        loadedCount = batchSize;
-        updateLoadMoreButton();
-        console.log("Home page initial batch loaded - Total:", videos.length);
-      } else {
-        grid.innerHTML = '<p style="text-align:center; color:#aaa; padding:40px;">Loading videos...</p>';
-        setTimeout(initHomeRender, 500);
-      }
+    if (grid && typeof videos !== "undefined" && videos.length > 0) {
+      grid.innerHTML = "";
+      renderVideoBatch(0, batchSize);
+      loadedCount = batchSize;
+      updateLoadMore();
+      console.log("Home initial batch loaded");
     }
 
-    initHomeRender();
-
-    // Infinite scroll (auto-load near bottom)
+    // Auto-load on scroll
     window.addEventListener("scroll", () => {
-      if (isLoading || loadedCount >= videos.length) return;
-
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
-        isLoading = true;
-        loadMoreContainer.style.display = "none"; // hide button while loading
-
-        const nextStart = loadedCount;
-        const nextEnd = Math.min(loadedCount + batchSize, videos.length);
-
-        renderVideoBatch(nextStart, nextEnd);
-        loadedCount = nextEnd;
-
-        setTimeout(() => {
-          isLoading = false;
-          updateLoadMoreButton();
-        }, 800);
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
+        loadNextBatch();
       }
     });
 
-    // Load more button click (fallback/manual trigger)
+    // Manual Load more button
     if (loadMoreBtn) {
-      loadMoreBtn.addEventListener("click", () => {
-        if (isLoading || loadedCount >= videos.length) return;
-
-        isLoading = true;
-        loadMoreBtn.textContent = "Loading...";
-        loadMoreBtn.disabled = true;
-
-        const nextStart = loadedCount;
-        const nextEnd = Math.min(loadedCount + batchSize, videos.length);
-
-        renderVideoBatch(nextStart, nextEnd);
-        loadedCount = nextEnd;
-
-        setTimeout(() => {
-          isLoading = false;
-          loadMoreBtn.textContent = "Load more";
-          loadMoreBtn.disabled = false;
-          updateLoadMoreButton();
-        }, 800);
-      });
+      loadMoreBtn.addEventListener("click", loadNextBatch);
     }
 
-    // Search filtering (resets everything)
+    // Search
     if (searchInput) {
       searchInput.addEventListener("input", () => {
-        const value = searchInput.value.toLowerCase().trim();
-
+        const val = searchInput.value.toLowerCase().trim();
         grid.innerHTML = "";
         loadedCount = 0;
-        loadMoreContainer.style.display = "none";
 
-        if (!value) {
+        if (!val) {
           renderVideoBatch(0, batchSize);
           loadedCount = batchSize;
-          updateLoadMoreButton();
+          updateLoadMore();
           return;
         }
 
-        const filtered = videos.filter(video =>
-          video.title.toLowerCase().includes(value) ||
-          (video.channel && video.channel.toLowerCase().includes(value))
+        const filtered = videos.filter(v => 
+          v.title.toLowerCase().includes(val) || 
+          (v.channel && v.channel.toLowerCase().includes(val))
         );
 
         renderVideoBatch(0, filtered.length);
-        console.log("Search filtered to", filtered.length, "videos");
       });
     }
 
-    console.log("Home page infinite scroll + load more initialized");
-  });
+    // ─── FIXED NAVIGATION ───
+    console.log("Attaching navigation listeners");
 
-  // ─── Bottom nav clickable ───
-  const bottomNav = document.querySelectorAll(".bottom-nav span");
-  bottomNav.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const nav = btn.dataset.nav;
-      switch(nav) {
-        case "home": window.location.href = "index.html"; break;
-        case "trending": window.location.href = "trending.html"; break;
-        case "upload": alert("Upload feature coming soon!"); break;
-        case "subscriptions": window.location.href = "subscriptions.html"; break;
-        case "library": window.location.href = "library.html"; break;
+    // Bottom nav
+    const bottomNav = document.querySelectorAll(".bottom-nav span");
+    console.log("Bottom nav items:", bottomNav.length);
+    bottomNav.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const nav = btn.dataset.nav;
+        console.log("Bottom nav click:", nav);
+        switch(nav) {
+          case "home": window.location.href = "index.html"; break;
+          case "trending": window.location.href = "trending.html"; break;
+          case "upload": alert("Upload coming soon!"); break;
+          case "subscriptions": window.location.href = "subscriptions.html"; break;
+          case "library": window.location.href = "library.html"; break;
+        }
+      });
+    });
+
+    // Sidebar
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+    console.log("Sidebar links:", sidebarLinks.length);
+    sidebarLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const nav = link.dataset.nav;
+        console.log("Sidebar click:", nav);
+        switch(nav) {
+          case 'home': window.location.href = 'index.html'; break;
+          case 'trending': window.location.href = 'trending.html'; break;
+          case 'subscriptions': window.location.href = 'subscriptions.html'; break;
+          case 'library': window.location.href = 'library.html'; break;
+        }
+      });
+    });
+
+    // Highlight active page
+    const currentPage = window.location.pathname.split("/").pop() || 'index.html';
+    console.log("Current page:", currentPage);
+
+    document.querySelectorAll('.sidebar a, .bottom-nav span').forEach(el => {
+      const nav = el.dataset.nav;
+      if (
+        (currentPage === 'index.html' && nav === 'home') ||
+        (currentPage === 'trending.html' && nav === 'trending') ||
+        (currentPage === 'subscriptions.html' && nav === 'subscriptions') ||
+        (currentPage === 'library.html' && nav === 'library')
+      ) {
+        el.classList.add('active');
+      } else {
+        el.classList.remove('active');
       }
     });
-  });
-
-  // ─── Sidebar clickable ───
-  const sidebarLinks = document.querySelectorAll('.sidebar a');
-  sidebarLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      const nav = link.dataset.nav;
-      switch(nav) {
-        case 'home': window.location.href = 'index.html'; break;
-        case 'trending': window.location.href = 'trending.html'; break;
-        case 'subscriptions': window.location.href = 'subscriptions.html'; break;
-        case 'library': window.location.href = 'library.html'; break;
-      }
-    });
-  });
-
-  // ─── Highlight active page ───
-  const currentPage = window.location.pathname.split("/").pop() || 'index.html';
-
-  document.querySelectorAll('.sidebar a, .bottom-nav span').forEach(el => {
-    const nav = el.dataset.nav;
-    const isActive = 
-      (currentPage === 'index.html' && nav === 'home') ||
-      (currentPage === 'trending.html' && nav === 'trending') ||
-      (currentPage === 'subscriptions.html' && nav === 'subscriptions') ||
-      (currentPage === 'library.html' && nav === 'library');
-
-    if (isActive) el.classList.add('active');
-    else el.classList.remove('active');
   });
 </script>
 

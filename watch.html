@@ -9,7 +9,6 @@
 
 <body class="watch-page">
 
-<!-- TOP NAV -->
 <header class="top-nav">
   <h1 class="logo">MyTube</h1>
   <input type="search" id="searchInput" placeholder="Search" />
@@ -17,7 +16,6 @@
 </header>
 
 <div class="container">
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <a href="index.html" data-nav="home">🏠 Home</a>
     <a href="trending.html" data-nav="trending">🔥 Trending</a>
@@ -25,7 +23,6 @@
     <a href="library.html" data-nav="library">📁 Library</a>
   </aside>
 
-  <!-- MAIN CONTENT -->
   <main class="videos">
     <div id="videoInfo" style="margin-bottom: 12px;">
       <h2 id="videoTitle" style="font-size:1.2rem; margin-bottom:4px;"></h2>
@@ -33,21 +30,17 @@
       <div id="videoMeta" style="color:#aaa; font-size:0.85rem;"></div>
     </div>
 
-
-
-    <!-- Responsive video wrapper -->
     <div class="video-wrapper">
       <iframe
         id="player"
         frameborder="0"
-        allow="autoplay; encrypted-media"
+        allow="autoplay; encrypted-media; fullscreen"
         allowfullscreen>
       </iframe>
     </div>
   </main>
 </div>
 
-<!-- MOBILE BOTTOM NAV -->
 <nav class="bottom-nav">
   <span data-nav="home">🏠</span>
   <span data-nav="trending">🔥</span>
@@ -58,27 +51,43 @@
 
 <script src="data.js"></script>
 <script>
-  // Get video id from URL
+  // Get and clean video ID from URL
   const params = new URLSearchParams(window.location.search);
-  const id = params.get("id");
+  const rawId = params.get("id");
+  const cleanId = rawId ? rawId.split("?")[0].split("&")[0].trim() : null;
 
-  // Find the video in the videos array
-  let videoData = null;
-  if (id && typeof videos !== "undefined") {
-    videoData = videos.find(v => v.id === id);
+  // Find video data
+  const videoData = videos.find(v => v.id === cleanId);
 
-    // Set iframe src
-    document.getElementById("player").src = `https://www.youtube.com/embed/${id}`;
+  const player = document.getElementById("player");
+  const titleEl = document.getElementById("videoTitle");
+  const channelEl = document.getElementById("videoChannel");
+  const metaEl = document.getElementById("videoMeta");
 
-    // Set video info
-    if (videoData) {
-      document.getElementById("videoTitle").textContent = videoData.title;
-      document.getElementById("videoChannel").textContent = videoData.channel;
-      document.getElementById("videoMeta").textContent = `${videoData.views} • ${videoData.time}`;
-    }
+  // Play logic with fallback for fake/generated IDs
+  if (cleanId && videoData) {
+    // Real video → play embedded with autoplay
+    player.src = `https://www.youtube.com/embed/${cleanId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+    titleEl.textContent = videoData.title;
+    channelEl.textContent = videoData.channel;
+    metaEl.textContent = `${videoData.views} • ${videoData.time}`;
+
+    // Save to watch history (only real IDs)
+    const history = JSON.parse(localStorage.getItem("watchHistory")) || [];
+    if (!history.includes(cleanId)) history.unshift(cleanId);
+    localStorage.setItem("watchHistory", JSON.stringify(history.slice(0, 20)));
+  } else {
+    // Fallback for invalid/fake ID → play Rick Astley (always works)
+    const fallbackId = "dQw4w9WgXcQ";
+    player.src = `https://www.youtube.com/embed/${fallbackId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+    titleEl.textContent = "Preview Not Available – Enjoy This Classic!";
+    channelEl.textContent = "Rick Astley";
+    metaEl.textContent = "1.5B+ views • 12 years ago";
+
+    console.log("Fallback used for invalid/fake ID:", cleanId);
   }
 
-  // ===== Bottom nav clickable functionality =====
+  // ─── Bottom nav clickable (unchanged) ───
   const bottomNav = document.querySelectorAll(".bottom-nav span");
   bottomNav.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -93,7 +102,7 @@
     });
   });
 
-  // ===== Sidebar clickable functionality =====
+  // ─── Sidebar clickable (unchanged) ───
   const sidebarLinks = document.querySelectorAll('.sidebar a');
   sidebarLinks.forEach(link => {
     link.addEventListener('click', () => {
@@ -107,17 +116,16 @@
     });
   });
 
-  // ===== Highlight active page =====
-  const currentPage = window.location.pathname.split("/").pop(); // e.g., 'watch.html' or 'index.html'
+  // ─── Highlight active page (unchanged) ───
+  const currentPage = window.location.pathname.split("/").pop();
 
-  // Highlight sidebar
   sidebarLinks.forEach(link => {
     if (
       (currentPage === 'index.html' && link.dataset.nav === 'home') ||
       (currentPage === 'trending.html' && link.dataset.nav === 'trending') ||
       (currentPage === 'subscriptions.html' && link.dataset.nav === 'subscriptions') ||
       (currentPage === 'library.html' && link.dataset.nav === 'library') ||
-      (currentPage === 'watch.html' && link.dataset.nav === 'home') // watch.html treated as home
+      (currentPage === 'watch.html' && link.dataset.nav === 'home')
     ) {
       link.classList.add('active');
     } else {
@@ -125,14 +133,13 @@
     }
   });
 
-  // Highlight bottom nav
   bottomNav.forEach(btn => {
     if (
       (currentPage === 'index.html' && btn.dataset.nav === 'home') ||
       (currentPage === 'trending.html' && btn.dataset.nav === 'trending') ||
       (currentPage === 'subscriptions.html' && btn.dataset.nav === 'subscriptions') ||
       (currentPage === 'library.html' && btn.dataset.nav === 'library') ||
-      (currentPage === 'watch.html' && btn.dataset.nav === 'home') // watch.html treated as home
+      (currentPage === 'watch.html' && btn.dataset.nav === 'home')
     ) {
       btn.classList.add('active');
     } else {

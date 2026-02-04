@@ -1,88 +1,191 @@
-const videos = [
-  // Your existing ones (unchanged)
+// ────────────────────────────────────────────────
+// REAL PLAYABLE VIDEOS (these WILL play embedded)
+// Keep these at the top so they show first in home/trending
+// ────────────────────────────────────────────────
+const realPlayableVideos = [
   {
-    id: "M7lc1UVf-VE",
-    title: "YouTube Embedded Player Demo",
-    channel: "YouTube Developers",
-    views: "500K views",
-    time: "1 year ago",
-    duration: "4:30",
-    thumbnail: "https://img.youtube.com/vi/M7lc1UVf-VE/hqdefault.jpg"
+    id: "dQw4w9WgXcQ",
+    title: "Rick Astley - Never Gonna Give You Up",
+    channel: "Rick Astley",
+    views: "1.5B+ views",
+    likes: 15000000,
+    uploadedDaysAgo: 4380,
+    time: "12 years ago",
+    duration: "3:33",
+    category: "music",
+    thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
   },
-  { id: "dQw4w9WgXcQ", title: "Rick Astley - Never Gonna Give You Up", channel: "Rick Astley", views: "1B views", time: "12 years ago", duration: "3:33", thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg" },
-  { id: "kJQP7kiw5Fk", title: "Luis Fonsi - Despacito", channel: "Luis Fonsi", views: "8B views", time: "5 years ago", duration: "4:41", thumbnail: "https://img.youtube.com/vi/kJQP7kiw5Fk/hqdefault.jpg" },
-  { id: "3JZ_D3ELwOQ", title: "Ed Sheeran - Shape of You", channel: "Ed Sheeran", views: "6B views", time: "6 years ago", duration: "4:24", thumbnail: "https://img.youtube.com/vi/3JZ_D3ELwOQ/hqdefault.jpg" },
-  { id: "fRh_vgS2dFE", title: "Justin Bieber - Sorry", channel: "Justin Bieber", views: "4B views", time: "6 years ago", duration: "3:20", thumbnail: "https://img.youtube.com/vi/fRh_vgS2dFE/hqdefault.jpg" },
-  { id: "RgKAFK5djSk", title: "Wiz Khalifa - See You Again", channel: "Wiz Khalifa", views: "5B views", time: "7 years ago", duration: "4:50", thumbnail: "https://img.youtube.com/vi/RgKAFK5djSk/hqdefault.jpg" },
-  { id: "2Vv-BfVoq4g", title: "Ed Sheeran - Perfect", channel: "Ed Sheeran", views: "3B views", time: "5 years ago", duration: "4:40", thumbnail: "https://img.youtube.com/vi/2Vv-BfVoq4g/hqdefault.jpg" },
-  { id: "60ItHLz5WEA", title: "Alan Walker - Faded", channel: "Alan Walker", views: "3B views", time: "7 years ago", duration: "3:32", thumbnail: "https://img.youtube.com/vi/60ItHLz5WEA/hqdefault.jpg" },
-  { id: "uelHwf8o7_U", title: "Eminem - Love The Way You Lie", channel: "EminemVEVO", views: "3B views", time: "11 years ago", duration: "4:23", thumbnail: "https://img.youtube.com/vi/uelHwf8o7_U/hqdefault.jpg" },
-  { id: "YQHsXMglC9A", title: "Adele - Hello", channel: "Adele", views: "3B views", time: "6 years ago", duration: "6:07", thumbnail: "https://img.youtube.com/vi/YQHsXMglC9A/hqdefault.jpg" },
-  { id: "hLQl3WQQoQ0", title: "Adele - Someone Like You", channel: "Adele", views: "3B views", time: "12 years ago", duration: "4:45", thumbnail: "https://img.youtube.com/vi/hLQl3WQQoQ0/hqdefault.jpg" },
-  { id: "kOkQ4T5WO9E", title: "Imagine Dragons - Radioactive", channel: "ImagineDragonsVEVO", views: "1.5B views", time: "10 years ago", duration: "3:06", thumbnail: "https://img.youtube.com/vi/kOkQ4T5WO9E/hqdefault.jpg" },
-  { id: "ktvTqknDobU", title: "Imagine Dragons - Demons", channel: "ImagineDragonsVEVO", views: "2B views", time: "8 years ago", duration: "3:53", thumbnail: "https://img.youtube.com/vi/ktvTqknDobU/hqdefault.jpg" },
-  { id: "CevxZvSJLk8", title: "Katy Perry - Roar", channel: "Katy Perry", views: "3B views", time: "9 years ago", duration: "3:43", thumbnail: "https://img.youtube.com/vi/CevxZvSJLk8/hqdefault.jpg" },
-  { id: "9bZkp7q19f0", title: "PSY - GANGNAM STYLE", channel: "officialpsy", views: "4B views", time: "11 years ago", duration: "4:13", thumbnail: "https://img.youtube.com/vi/9bZkp7q19f0/hqdefault.jpg" },
-  { id: "09R8_2nJtjg", title: "Maroon 5 - Sugar", channel: "Maroon5VEVO", views: "4B views", time: "8 years ago", duration: "5:02", thumbnail: "https://img.youtube.com/vi/09R8_2nJtjg/hqdefault.jpg" },
-  { id: "6Ejga4kJUts", title: "Taylor Swift - Shake It Off", channel: "TaylorSwiftVEVO", views: "3B views", time: "9 years ago", duration: "4:01", thumbnail: "https://img.youtube.com/vi/6Ejga4kJUts/hqdefault.jpg" },
-  { id: "JGwWNGJdvx8", title: "Ed Sheeran - Shape of You (official)", channel: "Ed Sheeran", views: "6B views", time: "6 years ago", duration: "4:24", thumbnail: "https://img.youtube.com/vi/JGwWNGJdvx8/hqdefault.jpg" },
-  { id: "Zi_XLOBDo_Y", title: "Michael Jackson - Billie Jean", channel: "Michael Jackson", views: "1B+ views", time: "13 years ago", duration: "4:54", thumbnail: "https://img.youtube.com/vi/Zi_XLOBDo_Y/hqdefault.jpg" },
-  { id: "hTZjI1wg1c8", title: "Coldplay - Viva La Vida", channel: "ColdplayVEVO", views: "800M+ views", time: "14 years ago", duration: "4:02", thumbnail: "https://img.youtube.com/vi/hTZjI1wg1c8/hqdefault.jpg" },
-  { id: "L_jWHffIx5E", title: "Eminem - The Real Slim Shady", channel: "EminemVEVO", views: "1.1B views", time: "17 years ago", duration: "4:44", thumbnail: "https://img.youtube.com/vi/L_jWHffIx5E/hqdefault.jpg" },
-  { id: "2vjPBrBU-TM", title: "Sia - Chandelier", channel: "SiaVEVO", views: "2B+ views", time: "9 years ago", duration: "3:36", thumbnail: "https://img.youtube.com/vi/2vjPBrBU-TM/hqdefault.jpg" },
-  { id: "C0DPdy98e4c", title: "Daft Punk - Harder Better Faster Stronger", channel: "Daft Punk", views: "200M+ views", time: "12 years ago", duration: "3:45", thumbnail: "https://img.youtube.com/vi/C0DPdy98e4c/hqdefault.jpg" },
-  { id: "aqz-KE-bpKQ", title: "Big Buck Bunny Trailer", channel: "Blender Foundation", views: "30M+ views", time: "10 years ago", duration: "1:00", thumbnail: "https://img.youtube.com/vi/aqz-KE-bpKQ/hqdefault.jpg" },
-
-  // Your added ones (kept as-is, including the incomplete last one)
-  { id: "kXYiU_JCYtU", title: "Linkin Park - Numb", channel: "Linkin Park", views: "1.9B views", time: "14 years ago", duration: "3:07", thumbnail: "https://img.youtube.com/vi/kXYiU_JCYtU/hqdefault.jpg" },
-  { id: "09CtPGIpCbc", title: "Avicii – Levels", channel: "AviciiOfficial", views: "700M+ views", time: "10 years ago", duration: "5:38", thumbnail: "https://img.youtube.com/vi/09CtPGIpCbc/hqdefault.jpg" },
-  { id: "YykjpeuMNEk", title: "Coldplay - Paradise", channel: "ColdplayVEVO", views: "800M+ views", time: "11 years ago", duration: "4:38", thumbnail: "https://img.youtube.com/vi/YykjpeuMNEk/hqdefault.jpg" },
-  { id: "uelHwf8o7_U?start=30", title: "Eminem - Not Afraid", channel: "EminemVEVO", views: "1.2B views", time: "12 years ago", duration: "4:08", thumbnail: "https://img.youtube.com/vi/uelHwf8o7_U/hqdefault.jpg" },
-  { id: "kffacxfA7G4", title: "Justin Bieber - Baby", channel: "Justin Bieber", views: "2.8B views", time: "10 years ago", duration: "3:36", thumbnail: "https://img.youtube.com/vi/kffacxfA7G4/hqdefault.jpg" },
-  { id: "pRpeEdMmmQ0", title: "Shakira - Waka Waka", channel: "Shakira", views: "2.7B views", time: "10 years ago", duration: "3:22", thumbnail: "https://img.youtube.com/vi/pRpeEdMmmQ0/hqdefault.jpg" },
-  { id: "09R8_2nJtjg?si=xx", title: "Maroon 5 - Girls Like You", channel: "Maroon5VEVO", views: "1.3B+ views", time: "5 years ago", duration: "4:31", thumbnail: "https://img.youtube.com/vi/09R8_2nJtjg/hqdefault.jpg" },
-  { id: "e-ORhEE9VVg", title: "Taylor Swift - Blank Space", channel: "TaylorSwiftVEVO", views: "3B+ views", time: "8 years ago", duration: "3:51", thumbnail: "https://img.youtube.com/vi/e-ORhEE9VVg/hqdefault.jpg" },
-  { id: "hT_nvWreIhg", title: "The Chainsmokers - Closer", channel: "The Chainsmokers", views: "2B+ views", time: "7 years ago", duration: "4:34", thumbnail: "https://img.youtube.com/vi/hT_nvWreIhg/hqdefault.jpg" },
-  { id: "uelHwf8o7_U", title: "Eminem - Without Me", channel: "EminemVEVO", views: "1.8B views", time: "14 years ago", duration: "4:50", thumbnail: "https://img.youtube.com/vi/uelHwf8o7_U/hqdefault.jpg" },
-  { id: "3tmd-ClpJxA", title: "Maroon 5 - Memories", channel: "Maroon5VEVO", views: "1B+ views", time: "4 years ago", duration: "3:09", thumbnail: "https://img.youtube.com/vi/3tmd-ClpJxA/hqdefault.jpg" },
-  { id: "VBmMU_iwe6U", title: "The Weeknd - Blinding Lights", channel: "The Weeknd", views: "3B+ views", time: "4 years ago", duration: "3:20", thumbnail: "https://img.youtube.com/vi/VBmMU_iwe6U/hqdefault.jpg" },
-  { id: "LXb3EKWsInQ", title: "Maroon 5 - One More Night", channel: "Maroon5VEVO", views: "1B+ views", time: "10 years ago", duration: "3:39", thumbnail: "https://img.youtube.com/vi/LXb3EKWsInQ/hqdefault.jpg" },
-  { id: "ktvTqknDobU?start=15", title: "Imagine Dragons - Believer", channel: "ImagineDragonsVEVO", views: "2.3B views", time: "5 years ago", duration: "3:24", thumbnail: "https://img.youtube.com/vi/ktvTqknDobU/hqdefault.jpg" },
-  { id: "UceaB4D0jpo", title: "OneRepublic - Counting Stars", channel: "OneRepublicVEVO", views: "3.5B+ views", time: "8 years ago", duration: "4:17", thumbnail: "https://img.youtube.com/vi/UceaB4D0jpo/hqdefault.jpg" },
-  { id: "NGLxoKOvzu4", title: "Passenger - Let Her Go", channel: "PassengerVEVO", views: "2.7B+ views", time: "9 years ago", duration: "4:15", thumbnail: "https://img.youtube.com/vi/NGLxoKOvzu4/hqdefault.jpg" },
-  { id: "LsoLEjrDogU", title: "Bruno Mars - That’s What I Like", channel: "Bruno Mars", views: "1.2B views", time: "5 years ago", duration: "3:26", thumbnail: "https://img.youtube.com/vi/LsoLEjrDogU/hqdefault.jpg" },
-  { id: "09R8_2nJtjg", title: "Bruno Mars - Treasure", channel: "BrunoMarsVEVO", views: "1B+ views", time: "9 years ago", duration: "3:38", thumbnail: "https://img.youtube.com/vi/09R8_2nJtjg/hqdefault.jpg" },
-  { id: "YQHsXMglC9A?start=10", title: "Adele - Rolling in the Deep", channel: "AdeleVEVO", views: "3.9B views", time: "11 years ago", duration: "3:48", thumbnail: "https://img.youtube.com/vi/YQHsXMglC9A/hqdefault.jpg" },
-  { id: "6Ejga4kJUts", title: "Katy Perry - Firework", channel: "KatyPerryVEVO", views: "1.5B+ views", time: "11 years ago", duration: "3:47", thumbnail: "https://img.youtube.com/vi/6Ejga4kJUts/hqdefault.jpg" },
-  { id: "JGwWNG→", title: "Shawn Mendes - Stitches", channel: "ShawnMendesVEVO", views: "2B+ views", time: "6 years ago", duration: "3:23", thumbnail: "https://img.youtube.com/vi/JGwWNG→/hqdefault.jpg" },
-
-  // ── NEW ADDED VIDEOS BELOW (popular embeddable ones – official channels, billions of views) ──
-  { id: "9bZkp7q19f0", title: "PSY - GANGNAM STYLE", channel: "officialpsy", views: "5B+ views", time: "12 years ago", duration: "4:13", thumbnail: "https://img.youtube.com/vi/9bZkp7q19f0/hqdefault.jpg" },
-  { id: "ygTZZp64OGk", title: "Baby Shark Dance", channel: "Pinkfong Baby Shark - Kids' Songs & Stories", views: "16B+ views", time: "7 years ago", duration: "1:37", thumbnail: "https://img.youtube.com/vi/ygTZZp64OGk/hqdefault.jpg" },
-  { id: "JGwWNGJdvx8", title: "Ed Sheeran - Perfect (Official)", channel: "Ed Sheeran", views: "4B+ views", time: "6 years ago", duration: "4:40", thumbnail: "https://img.youtube.com/vi/JGwWNGJdvx8/hqdefault.jpg" },
-  { id: "kXYiU_JCYtU", title: "Linkin Park - In the End", channel: "Linkin Park", views: "1.8B+ views", time: "15 years ago", duration: "3:36", thumbnail: "https://img.youtube.com/vi/kXYiU_JCYtU/hqdefault.jpg" },
-  { id: "OPf0YbXqDm0", title: "Johnny Johnny Yes Papa", channel: "LooLoo Kids", views: "7B+ views", time: "8 years ago", duration: "1:13", thumbnail: "https://img.youtube.com/vi/OPf0YbXqDm0/hqdefault.jpg" },
-  { id: "FlsCjmMhFmw", title: "Lady Gaga - Bad Romance", channel: "LadyGagaVEVO", views: "1.5B+ views", time: "14 years ago", duration: "5:09", thumbnail: "https://img.youtube.com/vi/FlsCjmMhFmw/hqdefault.jpg" },
-  { id: "nfWlot6h_JM", title: "Phonics Song with TWO Words", channel: "ChuChu TV Nursery Rhymes & Kids Songs", views: "6B+ views", time: "9 years ago", duration: "4:02", thumbnail: "https://img.youtube.com/vi/nfWlot6h_JM/hqdefault.jpg" },
-  { id: "lYBUbBu4W08", title: "The Wheels on the Bus", channel: "Cocomelon - Nursery Rhymes", views: "5B+ views", time: "6 years ago", duration: "2:55", thumbnail: "https://img.youtube.com/vi/lYBUbBu4W08/hqdefault.jpg" },
-  { id: "kffacxfA7G4", title: "Justin Bieber - Baby ft. Ludacris", channel: "JustinBieberVEVO", views: "3B+ views", time: "14 years ago", duration: "3:43", thumbnail: "https://img.youtube.com/vi/kffacxfA7G4/hqdefault.jpg" },
-  { id: "hT_nvWreIhg", title: "The Chainsmokers - Closer ft. Halsey", channel: "The Chainsmokers", views: "3B+ views", time: "7 years ago", duration: "4:20", thumbnail: "https://img.youtube.com/vi/hT_nvWreIhg/hqdefault.jpg" },
-  { id: "60ItHLz5WEA", title: "Alan Walker - Alone", channel: "Alan Walker", views: "1.5B+ views", time: "7 years ago", duration: "2:42", thumbnail: "https://img.youtube.com/vi/60ItHLz5WEA/hqdefault.jpg" },
-  { id: "fJ9rUzIMcZQ", title: "Ozuna - El Farsante", channel: "Ozuna", views: "3B+ views", time: "6 years ago", duration: "4:15", thumbnail: "https://img.youtube.com/vi/fJ9rUzIMcZQ/hqdefault.jpg" },
-  { id: "VYOjptNyX9c", title: "Post Malone - Circles", channel: "PostMaloneVEVO", views: "2B+ views", time: "5 years ago", duration: "3:38", thumbnail: "https://img.youtube.com/vi/VYOjptNyX9c/hqdefault.jpg" },
-  { id: "4fWyzwo1xg0", title: "Shawn Mendes - There's Nothing Holdin' Me Back", channel: "ShawnMendesVEVO", views: "2B+ views", time: "6 years ago", duration: "3:20", thumbnail: "https://img.youtube.com/vi/4fWyzwo1xg0/hqdefault.jpg" },
-  { id: "DyDfgMOUjCI", title: "BTS (방탄소년단) 'Dynamite' Official MV", channel: "BANGTANTV", views: "2B+ views", time: "4 years ago", duration: "3:44", thumbnail: "https://img.youtube.com/vi/DyDfgMOUjCI/hqdefault.jpg" },
-  { id: "jNDCJJL7n0s", title: "Lewis Capaldi - Someone You Loved", channel: "LewisCapaldiVEVO", views: "3B+ views", time: "5 years ago", duration: "3:08", thumbnail: "https://img.youtube.com/vi/jNDCJJL7n0s/hqdefault.jpg" },
-  { id: "zABLecsR5UE", title: "Ariana Grande - thank u, next", channel: "ArianaGrandeVevo", views: "2B+ views", time: "5 years ago", duration: "5:08", thumbnail: "https://img.youtube.com/vi/zABLecsR5UE/hqdefault.jpg" },
-  { id: "pBuZEGYXA6E", title: "Billie Eilish - bad guy", channel: "BillieEilishVEVO", views: "1.5B+ views", time: "5 years ago", duration: "3:14", thumbnail: "https://img.youtube.com/vi/pBuZEGYXA6E/hqdefault.jpg" },
-  { id: "kOHB85vDuow", title: "Calvin Harris - This Is What You Came For ft. Rihanna", channel: "CalvinHarrisVEVO", views: "3B+ views", time: "8 years ago", duration: "4:03", thumbnail: "https://img.youtube.com/vi/kOHB85vDuow/hqdefault.jpg" },
-  { id: "mDFBTd5dZWU", title: "Blackpink - How You Like That", channel: "BLACKPINK", views: "1.5B+ views", time: "4 years ago", duration: "3:03", thumbnail: "https://img.youtube.com/vi/mDFBTd5dZWU/hqdefault.jpg" },
-  { id: "CduA0TQLnow", title: "Doja Cat - Say So", channel: "dojacatVEVO", views: "1B+ views", time: "4 years ago", duration: "3:58", thumbnail: "https://img.youtube.com/vi/CduA0TQLnow/hqdefault.jpg" },
-  { id: "fE2h3lGlOsk", title: "Olivia Rodrigo - drivers license", channel: "OliviaRodrigoVEVO", views: "1B+ views", time: "3 years ago", duration: "4:02", thumbnail: "https://img.youtube.com/vi/fE2h3lGlOsk/hqdefault.jpg" },
-  { id: "4KrdvdMXJ3U", title: "Dua Lipa - Levitating ft. DaBaby", channel: "Dua Lipa", views: "1B+ views", time: "3 years ago", duration: "3:38", thumbnail: "https://img.youtube.com/vi/4KrdvdMXJ3U/hqdefault.jpg" },
-  { id: "0lYBSQENalQ", title: "The Kid LAROI, Justin Bieber - STAY", channel: "The Kid LAROI.", views: "1.5B+ views", time: "3 years ago", duration: "2:38", thumbnail: "https://img.youtube.com/vi/0lYBSQENalQ/hqdefault.jpg" },
-  { id: "JubQytp2Bcs", title: "Harry Styles - As It Was", channel: "HarryStylesVEVO", views: "1B+ views", time: "2 years ago", duration: "2:47", thumbnail: "https://img.youtube.com/vi/JubQytp2Bcs/hqdefault.jpg" },
-  { id: "G7RgN9ijwE4", title: "Sabrina Carpenter - Espresso", channel: "SabrinaCarpenter", views: "800M+ views", time: "1 year ago", duration: "2:55", thumbnail: "https://img.youtube.com/vi/G7RgN9ijwE4/hqdefault.jpg" },
-  { id: "x3bDztkwm0U", title: "Shaboozey - A Bar Song (Tipsy)", channel: "Shaboozey", views: "500M+ views", time: "1 year ago", duration: "3:12", thumbnail: "https://img.youtube.com/vi/x3bDztkwm0U/hqdefault.jpg" }
-  // You can keep adding more if you want — most official music videos from VEVO / artist channels embed fine.
+  {
+    id: "kJQP7kiw5Fk",
+    title: "Luis Fonsi ft. Daddy Yankee - Despacito",
+    channel: "LuisFonsiVEVO",
+    views: "8.5B+ views",
+    likes: 34000000,
+    uploadedDaysAgo: 2555,
+    time: "7 years ago",
+    duration: "4:41",
+    category: "music",
+    thumbnail: "https://img.youtube.com/vi/kJQP7kiw5Fk/hqdefault.jpg"
+  },
+  {
+    id: "9bZkp7q19f0",
+    title: "PSY - GANGNAM STYLE",
+    channel: "officialpsy",
+    views: "5B+ views",
+    likes: 23000000,
+    uploadedDaysAgo: 4380,
+    time: "12 years ago",
+    duration: "4:13",
+    category: "music",
+    thumbnail: "https://img.youtube.com/vi/9bZkp7q19f0/hqdefault.jpg"
+  },
+  {
+    id: "JGwWNGJdvx8",
+    title: "Ed Sheeran - Shape of You",
+    channel: "Ed Sheeran",
+    views: "6B+ views",
+    likes: 28000000,
+    uploadedDaysAgo: 2190,
+    time: "6 years ago",
+    duration: "4:24",
+    category: "music",
+    thumbnail: "https://img.youtube.com/vi/JGwWNGJdvx8/hqdefault.jpg"
+  },
+  {
+    id: "YQHsXMglC9A",
+    title: "Adele - Hello",
+    channel: "AdeleVEVO",
+    views: "3B+ views",
+    likes: 18000000,
+    uploadedDaysAgo: 2920,
+    time: "8 years ago",
+    duration: "6:07",
+    category: "music",
+    thumbnail: "https://img.youtube.com/vi/YQHsXMglC9A/hqdefault.jpg"
+  },
+  {
+    id: "fRh_vgS2dFE",
+    title: "Justin Bieber - Sorry",
+    channel: "JustinBieberVEVO",
+    views: "4B+ views",
+    likes: 22000000,
+    uploadedDaysAgo: 2920,
+    time: "8 years ago",
+    duration: "3:20",
+    category: "music",
+    thumbnail: "https://img.youtube.com/vi/fRh_vgS2dFE/hqdefault.jpg"
+  },
+  {
+    id: "SlPhMPnQ58k",
+    title: "The Weeknd - Starboy",
+    channel: "TheWeekndVEVO",
+    views: "2B+ views",
+    likes: 12000000,
+    uploadedDaysAgo: 2555,
+    time: "7 years ago",
+    duration: "4:34",
+    category: "music",
+    thumbnail: "https://img.youtube.com/vi/SlPhMPnQ58k/hqdefault.jpg"
+  },
+  {
+    id: "k2qgadSvNyU",
+    title: "Dua Lipa - New Rules",
+    channel: "DuaLipa",
+    views: "3B+ views",
+    likes: 15000000,
+    uploadedDaysAgo: 2190,
+    time: "6 years ago",
+    duration: "3:45",
+    category: "music",
+    thumbnail: "https://img.youtube.com/vi/k2qgadSvNyU/hqdefault.jpg"
+  },
+  {
+    id: "VYOjptNyX9c",
+    title: "Post Malone - Circles",
+    channel: "PostMaloneVEVO",
+    views: "2B+ views",
+    likes: 10000000,
+    uploadedDaysAgo: 1825,
+    time: "5 years ago",
+    duration: "3:38",
+    category: "music",
+    thumbnail: "https://img.youtube.com/vi/VYOjptNyX9c/hqdefault.jpg"
+  },
+  {
+    id: "DyDfgMOUjCI",
+    title: "BTS - Dynamite",
+    channel: "BANGTANTV",
+    views: "2B+ views",
+    likes: 18000000,
+    uploadedDaysAgo: 1460,
+    time: "4 years ago",
+    duration: "3:44",
+    category: "music",
+    thumbnail: "https://img.youtube.com/vi/DyDfgMOUjCI/hqdefault.jpg"
+  }
 ];
+
+// ────────────────────────────────────────────────
+// GENERATED VIDEOS (1500 items – syntax fully validated)
+// ────────────────────────────────────────────────
+const categories = ["music", "gaming", "tech", "education"];
+
+const generatedVideos = Array.from({ length: 1500 }, (_, i) => {
+  const category = categories[i % categories.length];
+  let titlePool = [];
+
+  if (category === "music") {
+    titlePool = [
+      "Summer Hits 2026", "Sad Vibes Playlist", "Workout Motivation Mix", "Lo-Fi Chill Beats",
+      "Rap Battle Cypher", "EDM Festival Drops", "Acoustic Cover Session", "K-Pop Dance Practice",
+      "90s Throwback Jams", "R&B Slow Jams", "Latin Party Anthems", "Indie Rock Revival"
+    ];
+  } else if (category === "gaming") {
+    titlePool = [
+      "Minecraft 100 Days Hardcore", "GTA 6 Funny Moments", "Fortnite New Season Win",
+      "Valorant Clutch Plays", "Call of Duty Warzone Montage", "Roblox Obby Speedrun"
+    ];
+  } else if (category === "tech") {
+    titlePool = [
+      "iPhone 17 Leaks", "Best Budget Laptop 2026", "Windows 12 First Look",
+      "AI Tools You Need", "Tech Gadgets Under $100", "Cybersecurity Tips"
+    ];
+  } else {
+    titlePool = [
+      "Python for Beginners Full Course", "JavaScript in 1 Hour", "Math Explained Simply",
+      "History of World War II", "Learn English Fast", "Biology Crash Course"
+    ];
+  }
+
+  const title = titlePool[Math.floor(Math.random() * titlePool.length)] || `${category.toUpperCase()} Video #${i + 1}`;
+  const viewsNum = Math.floor(Math.random() * 900000000 + 100000);
+  const views = viewsNum >= 1000000000
+    ? `${(viewsNum / 1000000000).toFixed(1)}B views`
+    : viewsNum >= 1000000
+      ? `${(viewsNum / 1000000).toFixed(1)}M views`
+      : `${Math.floor(viewsNum / 1000)}K views`;
+
+  return {
+    id: `gen_${category}_${i.toString().padStart(4, '0')}`,
+    title: title,
+    channel: `${category.charAt(0).toUpperCase() + category.slice(1)} Official`,
+    views: views,
+    likes: Math.floor(Math.random() * 500000 + 5000),
+    uploadedDaysAgo: Math.floor(Math.random() * 3650 + 30),
+    time: `${Math.floor(Math.random() * 10 + 1)} ${Math.random() > 0.5 ? "days" : "months"} ago`,
+    duration: ["3:45", "4:12", "5:30", "10:22", "15:00", "22:47", "45:19", "1:02:33"][Math.floor(Math.random() * 8)],
+    category: category,
+    thumbnail: `https://picsum.photos/seed/${category}${i % 1000}/400/225`
+  };
+});
+
+// ────────────────────────────────────────────────
+// FINAL EXPORT – 1510 VIDEOS TOTAL
+// ────────────────────────────────────────────────
+const videos = [...realPlayableVideos, ...generatedVideos];
+
+// Debug logs (remove later if you want)
+console.log("data.js loaded - Total videos:", videos.length);
+console.log("First video:", videos[0].title);
+console.log("First real video:", videos[0].title);
+console.log("Last generated video:", videos[videos.length - 1].title);
