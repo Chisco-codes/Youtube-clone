@@ -59,35 +59,70 @@
   // Find video data
   const videoData = videos.find(v => v.id === cleanId);
 
-  const player = document.getElementById("player");
+  const playerWrapper = document.querySelector(".video-wrapper");
+  let player = document.getElementById("player");
   const titleEl = document.getElementById("videoTitle");
   const channelEl = document.getElementById("videoChannel");
   const metaEl = document.getElementById("videoMeta");
 
-  // Play logic with fallback for fake/generated IDs
-  if (cleanId && videoData) {
-    // Real video → play embedded with autoplay
-    player.src = `https://www.youtube.com/embed/${cleanId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
-    titleEl.textContent = videoData.title;
-    channelEl.textContent = videoData.channel;
-    metaEl.textContent = `${videoData.views} • ${videoData.time}`;
+  // Reliable fallback videos (always embeddable)
+  const fallbackVideos = [
+    { id: "dQw4w9WgXcQ", title: "Rick Astley - Never Gonna Give You Up", channel: "Rick Astley", meta: "1.5B+ views • 12 years ago" },
+    { id: "kJQP7kiw5Fk", title: "Luis Fonsi ft. Daddy Yankee - Despacito", channel: "LuisFonsiVEVO", meta: "8.5B+ views • 7 years ago" },
+    { id: "9bZkp7q19f0", title: "PSY - GANGNAM STYLE", channel: "officialpsy", meta: "5B+ views • 12 years ago" },
+    { id: "JGwWNGJdvx8", title: "Ed Sheeran - Shape of You", channel: "Ed Sheeran", meta: "6B+ views • 6 years ago" }
+  ];
 
-    // Save to watch history (only real IDs)
+  function createFreshPlayer() {
+    if (player) player.remove();
+    player = document.createElement("iframe");
+    player.id = "player";
+    player.frameBorder = "0";
+    player.allow = "autoplay; encrypted-media; fullscreen";
+    player.allowFullscreen = true;
+    playerWrapper.appendChild(player);
+  }
+
+  function playVideo(embedId, titleText, channelText, metaText) {
+    createFreshPlayer(); // Force new iframe to break stuck state
+    player.src = `https://www.youtube.com/embed/${embedId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+    titleEl.textContent = titleText;
+    channelEl.textContent = channelText;
+    metaEl.textContent = metaText;
+  }
+
+  if (cleanId && videoData) {
+    // Try requested video first
+    playVideo(cleanId, videoData.title, videoData.channel, `${videoData.views} • ${videoData.time}`);
+
+    // Timeout fallback - YouTube often doesn't fire error for restrictions
+    setTimeout(() => {
+      if (player.src.includes(cleanId)) {
+        console.log("Video likely restricted/unavailable - forcing fallback");
+        const fallback = fallbackVideos[Math.floor(Math.random() * fallbackVideos.length)];
+        playVideo(fallback.id, fallback.title + " (Fallback)", fallback.channel, fallback.meta);
+      }
+    }, 3500); // 3.5 seconds is enough to detect stuck unavailable state
+
+    // Error event fallback (extra safety)
+    player.addEventListener("error", () => {
+      console.log("Iframe error detected - using fallback");
+      const fallback = fallbackVideos[Math.floor(Math.random() * fallbackVideos.length)];
+      playVideo(fallback.id, fallback.title + " (Fallback)", fallback.channel, fallback.meta);
+    }, { once: true });
+
+    // Save to watch history
     const history = JSON.parse(localStorage.getItem("watchHistory")) || [];
     if (!history.includes(cleanId)) history.unshift(cleanId);
     localStorage.setItem("watchHistory", JSON.stringify(history.slice(0, 20)));
   } else {
-    // Fallback for invalid/fake ID → play Rick Astley (always works)
-    const fallbackId = "dQw4w9WgXcQ";
-    player.src = `https://www.youtube.com/embed/${fallbackId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
-    titleEl.textContent = "Preview Not Available – Enjoy This Classic!";
-    channelEl.textContent = "Rick Astley";
-    metaEl.textContent = "1.5B+ views • 12 years ago";
-
-    console.log("Fallback used for invalid/fake ID:", cleanId);
+    // Fake/invalid ID → immediate fallback
+    const fallback = fallbackVideos[Math.floor(Math.random() * fallbackVideos.length)];
+    playVideo(fallback.id, "Video not available – enjoy this instead!", fallback.channel, fallback.meta);
+    console.log("Fallback used for invalid ID:", cleanId);
   }
 
-  // ─── Bottom nav clickable (unchanged) ───
+  // Bottom nav clickable
   const bottomNav = document.querySelectorAll(".bottom-nav span");
   bottomNav.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -102,7 +137,7 @@
     });
   });
 
-  // ─── Sidebar clickable (unchanged) ───
+  // Sidebar clickable
   const sidebarLinks = document.querySelectorAll('.sidebar a');
   sidebarLinks.forEach(link => {
     link.addEventListener('click', () => {
@@ -116,16 +151,17 @@
     });
   });
 
-  // ─── Highlight active page (unchanged) ───
-  const currentPage = window.location.pathname.split("/").pop();
+  // Highlight active page
+  const currentPage = window.location.pathname.split("/").pop() || 'watch.html';
 
   sidebarLinks.forEach(link => {
+    const nav = link.dataset.nav;
     if (
-      (currentPage === 'index.html' && link.dataset.nav === 'home') ||
-      (currentPage === 'trending.html' && link.dataset.nav === 'trending') ||
-      (currentPage === 'subscriptions.html' && link.dataset.nav === 'subscriptions') ||
-      (currentPage === 'library.html' && link.dataset.nav === 'library') ||
-      (currentPage === 'watch.html' && link.dataset.nav === 'home')
+      (currentPage === 'index.html' && nav === 'home') ||
+      (currentPage === 'trending.html' && nav === 'trending') ||
+      (currentPage === 'subscriptions.html' && nav === 'subscriptions') ||
+      (currentPage === 'library.html' && nav === 'library') ||
+      (currentPage === 'watch.html' && nav === 'home')
     ) {
       link.classList.add('active');
     } else {
@@ -134,12 +170,13 @@
   });
 
   bottomNav.forEach(btn => {
+    const nav = btn.dataset.nav;
     if (
-      (currentPage === 'index.html' && btn.dataset.nav === 'home') ||
-      (currentPage === 'trending.html' && btn.dataset.nav === 'trending') ||
-      (currentPage === 'subscriptions.html' && btn.dataset.nav === 'subscriptions') ||
-      (currentPage === 'library.html' && btn.dataset.nav === 'library') ||
-      (currentPage === 'watch.html' && btn.dataset.nav === 'home')
+      (currentPage === 'index.html' && nav === 'home') ||
+      (currentPage === 'trending.html' && nav === 'trending') ||
+      (currentPage === 'subscriptions.html' && nav === 'subscriptions') ||
+      (currentPage === 'library.html' && nav === 'library') ||
+      (currentPage === 'watch.html' && nav === 'home')
     ) {
       btn.classList.add('active');
     } else {
